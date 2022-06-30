@@ -1,0 +1,464 @@
+<?php include('server.php') ?>
+ <!DOCTYPE html>
+ <html>
+ <head>
+ 	<title>Registration system PHP and MySQL</title>
+ 	<link rel="stylesheet" type="text/css" href="sty.css">
+ </head>
+ <body>
+
+ 	<div class="header">
+ 		<h2>Login</h2>
+ 	</div>
+
+ 	<form method="post" action="login.php"> <!-- metoda post are rolul de a trimite
+ 	                                           datele intorduse de utilizator serverului web
+ 																					   si cu atributul action va fi apelat un script cu
+ 																				     numele "server.php" care va avea rolul principal
+ 																			       in prelucrarea si validarea datelor-->
+
+
+
+ 		<div class="input-group">
+ 			<label>Username</label>
+ 			<input type="text" name="username" required="required"> <!--Eticheta <input> indică un câmp unde utilizatorul
+ 				                                                         va putea intorducere numele de utilizator pentru a urma validarea acestuia.
+ 																																 Atributul "type" are rolul de a specifica tipul cămpului ce va urma sa fie intordus.
+ 																															 Atributul "required" are rolul de a garanta ca
+ 																														  campul respectiv nu va fi liber inainte sa fie comunicat servereul web
+ 																															acest lucru reduce numarul cereri http prin prevenirea greselilor făcute de utilizator
+ 																														 -->
+ 		</div>
+ 		<div class="input-group">
+ 			<label>Password</label>
+ 			<input type="password" name="password" required="required"> <!--Eticheta <input> indică un câmp  unde utilizatorul
+ 				                                                         va putea intorducere parola de utilizator pentru a urma validarea acestuia.
+ 																																 Atributul "type" are rolul de a specifica tipul cămpului ce va urma sa fie intordus.
+ 																															 Atributul "required" are rolul de a garanta ca
+ 																														  campul respectiv nu va fi liber inainte sa fie comunicat servereul web
+ 																															acest lucru reduce numarul cereri http prin prevenirea greselilor făcute de utilizator
+ 																														 -->
+ 		</div>
+ 		<div class="input-group">
+ 			<button type="submit" class="btn" name="login_user">Login</button> <!--Tagul <button> definește un buton pe care se poate da clic odată apăsat pe el
+ 			 																																			acesta va rula scriptul server.php	-->
+ 		</div>
+ 		<p>
+ 		<a  href="register.php">Sign up</a>      <!--In caz că utilizatorul este nou pe platformă el
+ 			                                            are posibilitatea de aș crea un cont
+ 		                                           	-->
+ 		</p>
+ 	</form>
+
+
+ </body>
+ </html>
+ 9  
+logout.php
+ 
+@@ -0,0 +1,9 @@
+ <?php
+ // Always start this first
+ session_start();
+
+ // Destroying the session clears the $_SESSION variable, thus "logging" the user
+ // out. This also happens automatically when the browser is closed
+ session_destroy();
+ header('location: login.php');
+ ?>
+ 137  
+map3.php
+ 
+@@ -0,0 +1,137 @@
+ <!DOCTYPE html>
+ <html>
+   <head>
+     <link rel="stylesheet" type="text/css" href="sty.css">
+     <style>
+        /* Set the size of the div element that contains the map */
+       #map {
+          height: 800px;  /* The height is 400 pixels */
+          width: 70%;  /* The width is the width of the web page */
+          float: left;
+          position: absolute;
+        }
+
+        .cont{
+          margin-top: 200px;
+          height: 800px;  /* The height is 400 pixels */
+          width: 30%;
+          float: right;
+        }
+
+        .logout{
+         float: right;
+         position: absolute;
+         left: 95%;;
+         padding: 10px;
+ 	      font-size: 15px;
+ 	      color: white;
+       	background: black;
+       	border: none;
+ 	      border-radius: 5px;
+        }
+
+     </style>
+
+
+   </head>
+   <body>
+     <!-- COO Insert ---------------------->
+     <div class="cont">
+     <form action="myphp.php" method="POST" enctype="multipart/form-data">
+
+
+       <div class="input-group">
+         <label>Icon</label>
+         <select class="input-group" name="icon">
+     <option value="parking_lot_maps.png">Parcare</option>
+     <option value="library_maps.png">Librarie</option>
+     <option value="info-i_maps.png">Centru de informatii</option>
+     </select>
+       </div>
+       <div class="input-group">
+         <label>latitudine</label>
+         <input type="text" name="latitudine"placeholder="latitudine">
+       </div>
+       <div class="input-group">
+         <label>longitudine</label>
+         <input type="text" name="longitudine"placeholder="longitudine">
+       </div>
+       <div class="input-group">
+         <label>Description</label>
+         <input type="text" name="descriere"placeholder="Description">
+       </div>
+
+       <div class="input-group">
+        <label>upload</label>
+       <input type="file" name="file" value="">
+   </div>
+       <div class="input-group">
+
+         <input type="submit" class="btn" name="submit" value="trimite">
+       </div>
+
+     </form>
+   </div>
+   <input type="button" value="Logout" class="logout"
+ onClick="document.location.href='logout.php'" />
+     <!---------------------------------------------------------->
+
+     <!--The div element for the map -->
+     <div id="map"></div>
+     <script>
+
+ function initMap() {
+
+   var map = new google.maps.Map(
+       document.getElementById('map'), {
+ 	  zoom: 8,
+ 	  center: new google.maps.LatLng(44.4267674 , 26.102538390000063),
+     });
+
+     <?php
+ require 'new.php';
+
+ $sql_read = "SELECT * FROM coo";
+ 			$result = mysqli_query($con, $sql_read);
+ 			if(! $result )
+ 				{
+ 					die('Could not read data: ' . mysqli_error());
+ 				}
+
+         echo "  var iconBase =
+                               'https://developers.google.com/maps/documentation/javascript/examples/full/images/';
+               ";
+
+         while($row = mysqli_fetch_array($result)) {
+           $lat=$row['latitudine'];
+           $lng=$row['longitudine'];
+           $des=$row['descriere'];
+           $icon=$row['icon'];
+
+           echo "var marker = new google.maps.Marker({position:{lat:$lat,lng:$lng},map: map,icon: iconBase + '$icon'});";
+         //  echo "
+
+         //  marker.addListener('click', function() {
+         //  infowindow.open(map, marker);
+           //  });";
+         }
+
+         //   echo "
+       //  var infowindow = new google.maps.InfoWindow({
+       //  content: 'awd'
+         // });";
+
+      ?>
+
+ }
+     </script>
+     <!--Load the API from the specified URL
+     * The async attribute allows the browser to render the page while the API loads
+     * The key parameter will contain your own API key (which is not needed for this tutorial)
+     * The callback parameter executes the initMap() function
+     -->
+     <script async defer
+     src="https://maps.googleapis.com/maps/api/js?key=AIzaSyByKEo-eVV5YXXbbpGUsL7_Leuxb8c543U&callback=initMap">
+     </script>
+   </body>
+ </html>
+ 27  
+myphp.php
+ 
+@@ -0,0 +1,27 @@
+ <?php
+
+ require 'new.php';
+
+
+ $longitudine = $_POST['longitudine'];
+ $latitudine = $_POST['latitudine'];
+ $descriere= $_POST['descriere'];
+ $fileTmpName = $_FILES['file']['tmp_name'];
+ $fileName = $_FILES['file']['name'];
+ $icon = $_POST['icon'];
+
+
+ $sql = "INSERT INTO coo ( longitudine, latitudine, descriere , tmp_name , name , icon )
+  VALUES( '$longitudine', '$latitudine', '$descriere' , '$fileTmpName', '$fileName' , '$icon')";
+ $result = mysqli_query($con,$sql);
+ echo "coordonatele au fost introduse";
+ header('location: map3.php');
+
+
+
+
+
+
+
+
+   ?>
+ 11  
+new.php
+ 
+@@ -0,0 +1,11 @@
+  <?php
+ $con = mysqli_connect('localhost','root','','coor');
+ if (!$con) {
+   die("failed");
+ }else {
+
+ }
+
+
+
+   ?>
+ 41  
+register.php
+ 
+@@ -0,0 +1,41 @@
+ <?php include('server.php') ?>
+ <!DOCTYPE html>
+ <html>
+ <head>
+ 	<title>Registration system PHP and MySQL</title>
+ 	<link rel="stylesheet" type="text/css" href="sty.css">
+ </head>
+ <body>
+ 	<div class="header">
+ 		<h2>Register</h2>
+ 	</div>
+
+ 	<form method="post" action="register.php">
+
+
+
+ 		<div class="input-group">
+ 			<label>Username</label>
+ 			<input type="text" name="username" required="required" value="<?php echo $username; ?>">
+ 		</div>
+ 		<div class="input-group">
+ 			<label>Email</label>
+ 			<input type="email" name="email" required="required" value="<?php echo $email; ?>">
+ 		</div>
+ 		<div class="input-group">
+ 			<label>Password</label>
+ 			<input type="password" name="password_1" required="required">
+ 		</div>
+ 		<div class="input-group">
+ 			<label>Confirm password</label>
+ 			<input type="password" name="password_2" required="required">
+ 		</div>
+ 		<div class="input-group">
+ 			<button type="submit" class="btn" name="reg_user">Register</button>
+ 		</div>
+ 		<p>
+ 			Already a member? <a href="login.php">Sign in</a>
+ 		</p>
+ 	</form>
+ </body>
+ </html>
+ 79  
+server.php
+ 
+@@ -0,0 +1,79 @@
+ <?php
+ 	session_start();
+
+
+ 	$username = "";
+ 	$email    = "";
+ 	$errors = array();
+ 	$_SESSION['success'] = "";
+
+
+ 	$db = mysqli_connect('localhost', 'root', '', 'registration');
+  // Funcția mysqli_connect () stabilște o nouă conexiune la serverul MySQL.
+
+ 	if (isset($_POST['reg_user'])) { // Verifică dacă există un câmp cu numele
+ 		// "reg_user" (butonul cu numele "reg_user" in cazul nostru)
+ 		// în formularul trimis la această pagină php.
+ 		// daca se regasește atunci ceea ce este cuprins intre acolade va fi executat
+ 		$username = mysqli_real_escape_string($db, $_POST['username']);
+ 		 // toate variabilele următoare vor stoca datele intorduse de utilizator pentru a urma sa fie inserate in baza de date
+ 		$email = mysqli_real_escape_string($db, $_POST['email']);
+ 		$password_1 = mysqli_real_escape_string($db, $_POST['password_1']);
+ 		$password_2 = mysqli_real_escape_string($db, $_POST['password_2']);
+
+ 		//daca utilizatorul omite sa intorduca oricare din urmatoarele cămpuri pagina web ii va afișa un mesaj de avertizare
+ 		if (empty($username)) { array_push($errors, "Username is required"); }
+ 		if (empty($email)) { array_push($errors, "Email is required"); }
+ 		if (empty($password_1)) { array_push($errors, "Password is required"); }
+    // daca nu se regasesc aceleasi parole in ambele campuri va afisa un mesaj de eroare
+ 		if ($password_1 != $password_2) {
+ 			array_push($errors, "The two passwords do not match");
+ 		}
+
+ //daca nu se regasec erori provocata de utilizator atunci datele intorduse vor fi stocate in baza de date
+ 		if (count($errors) == 0) {
+ 			$password = md5($password_1);
+ 			$query = "INSERT INTO users (username, email, password)
+ 					  VALUES('$username', '$email', '$password')";
+ 			mysqli_query($db, $query);
+
+ 			$_SESSION['username'] = $username;
+ 			$_SESSION['success'] = "You are now logged in";
+ 			header('location: login.php');
+ 		}
+
+ 	}
+
+ 	// ...
+
+ 	// Verifică dacă există un câmp cu numele
+ 		// "login_user" (butonul cu numele "login_user" in cazul nostru)
+ 		// în formularul trimis la această pagină php.
+ 		// daca se regasește atunci ceea ce este cuprins intre acolade va fi executat
+ 	if (isset($_POST['login_user'])) {
+ 		$username = mysqli_real_escape_string($db, $_POST['username']); //campul inserat de utilizator va fi stocat in variabila $username pentru a fi apoi validată (se verifica dacă se regăsește in baza de date)
+ 		$password = mysqli_real_escape_string($db, $_POST['password']); //campul inserat de utilizator va fi stocat in variabila $password pentru a fi apoi validată (se verifica dacă se regăsește in baza de date)
+
+ 		if (empty($username)) { //daca utilizatorul omite de a intorduce numele de utilizator un mesaj de eroare va apărea
+ 			array_push($errors, "Username is required");
+ 		}
+ 		if (empty($password)) { //daca utilizatorul omite de a intorduce parola un mesaj de eroare va apărea
+ 			array_push($errors, "Password is required");
+ 		}
+
+ 		if (count($errors) == 0) {
+ 			$password = md5($password);
+ 			$query = "SELECT * FROM users WHERE username='$username' AND password='$password'";
+ 			$results = mysqli_query($db, $query);
+
+ 			if (mysqli_num_rows($results) == 1) {
+ 				$_SESSION['username'] = $username;
+ 				$_SESSION['success'] = "You are now logged in";
+ 				header('location: map3.php');
+ 			}else {
+ 				array_push($errors, "Wrong username/password combination");
+ 			}
+ 		}
+ 	}
+
+ ?>
+ 77  
+sty.css
+ 
+@@ -0,0 +1,77 @@
+ * {
+ 	margin: 0px;
+ 	padding: 0px;
+ }
+
+ body{
+   background-image: url(wallpaper.jpg);
+   background-size: cover;
+ }
+
+ .header {
+ 	width: 30%;
+ 	margin: 50px auto 0px;
+ 	color: black;
+ 	background: white;
+ 	text-align: center;
+ 	border: 1px solid black;
+ 	border-bottom: none;
+ 	border-radius: 10px 10px 0px 0px;
+ 	padding: 20px;
+   opacity: 0.8;
+ }
+
+ form, .content {
+   width: 30%;
+   margin: 0px auto;
+   padding: 20px;
+   border: 1px solid #B0C4DE;
+   background: white;
+   border-radius: 0px 0px 10px 10px;
+
+ .input-group {
+ 	margin: 10px 0px 10px 0px;
+ }
+
+ .input-group label {
+ 	display: block;
+ 	text-align: left;
+ 	margin: 3px;
+ }
+
+ .input-group input {
+ 	height: 30px;
+ 	width: 93%;
+ 	padding: 5px 10px;
+ 	font-size: 16px;
+ 	border-radius: 5px;
+ 	border: 1px solid gray;
+ }
+
+ .btn {
+ 	padding: 10px;
+ 	font-size: 15px;
+ 	color: white;
+ 	background: black;
+ 	border: none;
+ 	border-radius: 5px;
+   width: 100%;
+ }
+
+ .error {
+ 	width: 92%;
+ 	margin: 0px auto;
+ 	padding: 10px;
+ 	border: 1px solid #a94442;
+ 	color: #a94442;
+ 	background: #f2dede;
+ 	border-radius: 5px;
+ 	text-align: left;
+ }
+
+ .success {
+ 	color: #3c763d;
+ 	background: #dff0d8;
+ 	border: 1px solid #3c763d;
+ 	margin-bottom: 20px;
+ }
